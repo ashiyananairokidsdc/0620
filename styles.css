@@ -1,0 +1,8 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body, #root { min-height: 100%; }
+body {
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, system-ui, sans-serif;
+  background: #FBFAF7;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
