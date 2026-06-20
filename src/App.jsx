@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { auth, db, isFirebaseConfigured } from "./firebase";
-import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
+import { db } from "./firebase";
 import { collection, query, orderBy, onSnapshot, doc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { seedData } from "./seedData";
 
@@ -187,24 +186,11 @@ const countMulti = (rows, field, opts) =>
    メイン
    ========================================================================= */
 export default function SurveyDashboard() {
-  /* 認証（匿名サインイン：ログイン画面なし） */
-  const [user, setUser] = useState(undefined);
-  const [authError, setAuthError] = useState("");
-  useEffect(() => {
-    if (!isFirebaseConfigured) return;
-    return onAuthStateChanged(auth, (u) => {
-      if (u) setUser(u);
-      else signInAnonymously(auth).catch((e) => { setAuthError(e.message); setUser(null); });
-    });
-  }, []);
-
-  /* Firestore のデータ購読 */
+  /* Firestore のデータ購読（認証なし・そのまま読み書き） */
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dbError, setDbError] = useState("");
   useEffect(() => {
-    if (!isFirebaseConfigured || !user) { setLoading(false); return; }
-    setLoading(true);
     const qy = query(collection(db, "responses"), orderBy("createdAt", "asc"));
     const unsub = onSnapshot(
       qy,
@@ -212,7 +198,7 @@ export default function SurveyDashboard() {
       (err) => { setDbError(err.message); setLoading(false); }
     );
     return unsub;
-  }, [user]);
+  }, []);
 
   /* UI 状態 */
   const [tab, setTab] = useState("dashboard");
@@ -352,10 +338,7 @@ export default function SurveyDashboard() {
     return Object.keys(map).map(Number).sort((a, b) => a - b).map((k) => ({ label: `${k}歳`, count: map[k] }));
   }, [agg.ages]);
 
-  /* ---- 表示の出し分け ---- */
-  if (!isFirebaseConfigured) return <SetupScreen />;
-  if (authError) return <NoticeScreen title="認証の設定が必要です" body={"匿名サインインに失敗しました。Firebase コンソール → Authentication → Sign-in method で「匿名」を有効にしてください。\n\n（詳細: " + authError + "）"} />;
-  if (!user) return <CenterMsg text="準備中…" />;
+  /* ---- 画面 ---- */
 
   return (
     <div style={{ font: FONT, background: C.bg, color: C.ink, minHeight: "100vh", padding: "0 0 60px" }}>
@@ -396,7 +379,7 @@ export default function SurveyDashboard() {
       <main style={{ maxWidth: 880, margin: "0 auto", padding: "20px 16px 0" }}>
         {dbError && (
           <div style={{ background: "#FDECEA", border: "1px solid #F5C2BC", color: "#A23B2E", borderRadius: 12, padding: "12px 16px", marginBottom: 16, fontSize: 13, lineHeight: 1.6 }}>
-            データの読み込みでエラーが発生しました：{dbError}<br />Firestore のセキュリティルールで、ログイン済みユーザーの読み書きが許可されているかご確認ください。
+            データの読み込みでエラーが発生しました：{dbError}<br />Firestore のルールで読み書きが許可されているか（テスト用に <code>allow read, write: if true;</code>）をご確認ください。
           </div>
         )}
         {loading ? (
@@ -425,33 +408,10 @@ export default function SurveyDashboard() {
 }
 
 /* =========================================================================
-   ログイン / セットアップ / ローディング
+   ローディング表示
    ========================================================================= */
 function CenterMsg({ text, inline }) {
   return <div style={{ textAlign: "center", color: C.sub, padding: inline ? 40 : "20vh 20px", font: FONT }}>{text}</div>;
-}
-
-function SetupScreen() {
-  return (
-    <div style={{ font: FONT, color: C.ink, maxWidth: 620, margin: "0 auto", padding: "60px 20px" }}>
-      <RainbowRule />
-      <h1 style={{ fontSize: 20, fontWeight: 800, margin: "18px 0 8px" }}>初期設定が必要です</h1>
-      <p style={{ fontSize: 14, color: C.sub, lineHeight: 1.8 }}>
-        Firebase の環境変数が設定されていません。<code>.env</code>（ローカル）または Vercel の Environment Variables に
-        <code> VITE_FIREBASE_* </code>を登録してください。手順は README を参照してください。
-      </p>
-    </div>
-  );
-}
-
-function NoticeScreen({ title, body }) {
-  return (
-    <div style={{ font: FONT, color: C.ink, maxWidth: 620, margin: "0 auto", padding: "60px 20px" }}>
-      <RainbowRule />
-      <h1 style={{ fontSize: 20, fontWeight: 800, margin: "18px 0 8px" }}>{title}</h1>
-      <p style={{ fontSize: 14, color: C.sub, lineHeight: 1.8, whiteSpace: "pre-wrap" }}>{body}</p>
-    </div>
-  );
 }
 
 /* =========================================================================

@@ -1,28 +1,15 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
 
+// Firebase ウェブ設定（このキーは公開前提のものです。データの保護は Firestore のルールで行います）
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: "AIzaSyB6-8Io-a-zJknuGnW2dhV9zsECzKbCVzQ",
+  authDomain: "questionnaire-26436.firebaseapp.com",
+  projectId: "questionnaire-26436",
+  storageBucket: "questionnaire-26436.firebasestorage.app",
+  messagingSenderId: "997954998638",
+  appId: "1:997954998638:web:b027bb1f6f60dfa6a0317f",
 };
 
-// 環境変数が未設定（ローカルやVercelで未登録）の場合に判定するフラグ
-export const isFirebaseConfigured = Boolean(
-  firebaseConfig.apiKey && firebaseConfig.projectId
-);
-
-let app = null;
-let db = null;
-let auth = null;
-if (isFirebaseConfigured) {
-  app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
-  auth = getAuth(app);
-}
-
-export { app, db, auth };
+const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);
