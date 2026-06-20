@@ -1,10 +1,10 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 個人情報（氏名・連絡先）を含むため、ログイン済みユーザーのみ読み書き可。
-    // 本番では下のように必ず認証必須にしてください（テストモードのまま公開しない）。
+    // 認証なしで利用するため、responses コレクションの読み書きを許可します。
+    // （個人情報を含むため、公開URLを不特定多数に共有しないでください）
     match /responses/{docId} {
-      allow read, write: if request.auth != null;
+      allow read, write: if true;
     }
   }
 }
