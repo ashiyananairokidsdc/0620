@@ -190,4 +190,12 @@ export const seedData = [
     q10_age: "6", q10_time: "15分以内", q10_city: "", q11: "特に関心はない", q12: "10",
     q13: "子どもがいやがらず楽しく通院できているので選んで良かったです。習った英語を家でも少し話したりしているので、いずれ気になりだしそうです。（手書き判読やや不確か）",
     followupOk: false, followupName: "", followupContact: "" },
+
+  { id: "r24", patientNo: "889", patientName: "藤井 凛太郎", date: "2026-06-23", respondent: "保護者",
+    q1: "幼稚園・保育園のころ", q2: ["仕上げ磨き・食事で気づいた"], q2_other: "", q3: ["ほかの歯科に相談"], q4: "2〜3院",
+    q5: ["子どもへの接し方・院内の雰囲気", "口コミ・評判・紹介"], q5_top: "", q5_other: "",
+    q6: "1〜2週間", q7: "申し込んだ後・通い始めてから", q8: "1", q9: ["特にない"],
+    q10_age: "8", q10_time: "15分以内", q10_city: "", q11: "関心があり検討中", q12: "10",
+    q13: "",
+    followupOk: false, followupName: "", followupContact: "" },
 ];
