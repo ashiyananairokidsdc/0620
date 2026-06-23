@@ -707,7 +707,6 @@ function Dashboard({ agg, ageHist, goEntry }) {
       <Panel title="お子さま・ご家庭の属性" eyebrow="D — PROFILE" accent={C.spectrum[5]}>
         <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
           <Metric value={agg.ageAvg ?? "—"} label="平均年齢（歳）" color={C.spectrum[5]} />
-          <Metric value={agg.resp.find((x) => x.label === "保護者")?.count ?? 0} label="記入者：保護者" sub={`本人 ${agg.resp.find((x) => x.label === "本人")?.count ?? 0}件`} color={C.spectrum[5]} />
         </div>
         {ageHist.length > 0 && (<><SubHead>年齢の分布</SubHead><BarList items={ageHist} total={agg.n} accent={C.spectrum[5]} /><Gap /></>)}
         <SubHead>Q10 来院にかかる時間</SubHead><BarList items={agg.q10time} total={agg.n} accent={C.spectrum[5]} />
