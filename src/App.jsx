@@ -746,7 +746,54 @@ const Gap = () => <div style={{ height: 18 }} />;
 /* =========================================================================
    データ管理タブ
    ========================================================================= */
+/* 並べ替え（患者番号 / 記入日 × 昇順 / 降順） */
+function sortRows(rows, key, dir) {
+  const arr = [...rows];
+  arr.sort((a, b) => {
+    let av, bv;
+    if (key === "patientNo") {
+      av = parseInt(a.patientNo, 10); bv = parseInt(b.patientNo, 10);
+      if (Number.isNaN(av)) av = Infinity;
+      if (Number.isNaN(bv)) bv = Infinity;
+    } else { // date
+      av = a.date || ""; bv = b.date || "";
+    }
+    if (av < bv) return dir === "asc" ? -1 : 1;
+    if (av > bv) return dir === "asc" ? 1 : -1;
+    return 0;
+  });
+  return arr;
+}
+
+function SortBar({ sortKey, sortDir, onKey, onDir }) {
+  const seg = (active, label, onClick) => (
+    <button onClick={onClick} style={{
+      background: active ? C.teal : "#fff",
+      color: active ? "#fff" : C.sub,
+      border: `1px solid ${active ? C.teal : C.line}`,
+      padding: "7px 13px", borderRadius: 8, fontSize: 13, fontWeight: 700,
+      cursor: "pointer", font: FONT,
+    }}>{label}</button>
+  );
+  return (
+    <div style={{ display: "flex", gap: 14, marginBottom: 14, flexWrap: "wrap", alignItems: "center" }}>
+      <span style={{ fontSize: 12.5, color: C.sub, fontWeight: 700 }}>並べ替え</span>
+      <div style={{ display: "flex", gap: 6 }}>
+        {seg(sortKey === "patientNo", "患者番号", () => onKey("patientNo"))}
+        {seg(sortKey === "date", "記入日", () => onKey("date"))}
+      </div>
+      <div style={{ display: "flex", gap: 6 }}>
+        {seg(sortDir === "asc", "昇順 ↑", () => onDir("asc"))}
+        {seg(sortDir === "desc", "降順 ↓", () => onDir("desc"))}
+      </div>
+    </div>
+  );
+}
+
 function DataTab({ rows, removeRow, exportCsv, onEdit }) {
+  const [sortKey, setSortKey] = useState("patientNo");
+  const [sortDir, setSortDir] = useState("asc");
+  const sorted = useMemo(() => sortRows(rows, sortKey, sortDir), [rows, sortKey, sortDir]);
   const fmt = (v) => (Array.isArray(v) ? (v.length ? v.join("、") : "—") : (v ?? "") === "" ? "—" : v);
   const FieldRow = ({ q, label, value, accent }) => (
     <div style={{ display: "flex", gap: 8, padding: "6px 0", borderTop: `1px solid ${C.line}` }}>
@@ -775,8 +822,10 @@ function DataTab({ rows, removeRow, exportCsv, onEdit }) {
           まだ回答データがありません。アンケートの写真を送ってください。
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {rows.map((r, i) => (
+        <>
+          <SortBar sortKey={sortKey} sortDir={sortDir} onKey={setSortKey} onDir={setSortDir} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {sorted.map((r, i) => (
             <div key={r.id} style={{ background: "#fff", border: `1px solid ${C.line}`, borderRadius: 14, padding: "14px 16px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                 <span style={{ fontSize: 15, fontWeight: 800, color: C.tealDeep }}>
@@ -810,7 +859,8 @@ function DataTab({ rows, removeRow, exportCsv, onEdit }) {
               <FieldRow q="後日" label="協力" value={r.followupOk ? `協力OK（${fmt(r.followupName)} / ${fmt(r.followupContact)}）` : "—"} accent="#C98A3A" />
             </div>
           ))}
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
@@ -831,7 +881,10 @@ const _td = { padding: "10px 12px", verticalAlign: "top", lineHeight: 1.4 };
 const Empty = ({ text }) => <div style={{ color: C.sub, fontSize: 13.5, padding: "8px 2px" }}>{text}</div>;
 
 function RosterTab({ rows, exportRoster, exportFollowup }) {
-  const followers = rows.filter((r) => r.followupOk);
+  const [sortKey, setSortKey] = useState("patientNo");
+  const [sortDir, setSortDir] = useState("asc");
+  const sorted = useMemo(() => sortRows(rows, sortKey, sortDir), [rows, sortKey, sortDir]);
+  const followers = sorted.filter((r) => r.followupOk);
   return (
     <div>
       <div style={{ background: "#FFF6EC", border: "1px solid #F0DEC4", borderRadius: 12, padding: "12px 16px", marginBottom: 16, fontSize: 13, color: "#9A6B2F", lineHeight: 1.6 }}>
@@ -843,11 +896,13 @@ function RosterTab({ rows, exportRoster, exportFollowup }) {
           <button onClick={exportRoster} disabled={!rows.length} style={_btn(rows.length)}>名簿CSVを書き出す（{rows.length}件）</button>
         </div>
         {rows.length === 0 ? <Empty text="まだ回答がありません。" /> : (
+          <>
+          <SortBar sortKey={sortKey} sortDir={sortDir} onKey={setSortKey} onDir={setSortDir} />
           <div style={{ overflowX: "auto" }}>
             <table style={_table}>
               <thead><tr style={_thead}>{["No", "患者番号", "お名前", "記入日", "記入者"].map((h) => <th key={h} style={_th}>{h}</th>)}</tr></thead>
               <tbody>
-                {rows.map((r, i) => (
+                {sorted.map((r, i) => (
                   <tr key={r.id} style={{ borderTop: `1px solid ${C.line}` }}>
                     <td style={_td}>{i + 1}</td>
                     <td style={_td}>{r.patientNo || "—"}</td>
@@ -859,6 +914,7 @@ function RosterTab({ rows, exportRoster, exportFollowup }) {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </Panel>
 
@@ -872,7 +928,7 @@ function RosterTab({ rows, exportRoster, exportFollowup }) {
               <thead><tr style={{ ..._thead, background: "#FBEFD9", color: "#9A6B2F" }}>{["No", "患者番号", "お名前", "ご連絡先", "記入日"].map((h) => <th key={h} style={_th}>{h}</th>)}</tr></thead>
               <tbody>
                 {followers.map((r) => {
-                  const no = rows.indexOf(r) + 1;
+                  const no = sorted.indexOf(r) + 1;
                   return (
                     <tr key={r.id} style={{ borderTop: `1px solid ${C.line}` }}>
                       <td style={_td}>{no}</td>
