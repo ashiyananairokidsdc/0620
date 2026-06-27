@@ -254,4 +254,12 @@ export const seedData = [
     q10_age: "", q10_time: "15分以内", q10_city: "", q11: "すでに取り組ませている", q12: "10",
     q13: "",
     followupOk: false, followupName: "", followupContact: "" },
+
+  { id: "r32", patientNo: "754", patientName: "田邊 湊一郎", date: "2026-06-27", respondent: "保護者",
+    q1: "小学校低学年", q2: ["受診時に歯科で言われた"], q2_other: "", q3: ["特に何もしていない"], q4: "なかった（最初から当院だけ）",
+    q5: ["子どもへの接し方・院内の雰囲気", "呼吸・発音・成長まで見据える"], q5_top: "", q5_other: "",
+    q6: "その場で決めた", q7: "申し込んだ後・通い始めてから", q8: "1", q9: ["教材・アプリを使用"],
+    q10_age: "10", q10_time: "15分以内", q10_city: "", q11: "すでに取り組ませている", q12: "7",
+    q13: "",
+    followupOk: false, followupName: "", followupContact: "" },
 ];
